@@ -1,22 +1,37 @@
-let resource = {
-    id: {},
-    string: {},
-    drawable: {}
-};
+import MutationObserver from './lib/mutation.js'
+import View from './lib/view.js'
+import * as handler from './lib/handler.js'
 
-const handle =  {
-    get: (o, key) => {
-        console.log(o, key)
-        if (key == 'id') {
-            return o.id;
-        }
-    }
+export class R {
+	static get id() {
+		return new Proxy({}, handler.viewID)
+	}
 }
 
-export let R = {
-    id: new Proxy({}, {
-        get: (o, key) =>(o[key] = {}) && console.log(o, key)
-    }),
-    string: new Proxy(resource, handle),
-    drawable: new Proxy(resource, handle)
-};
+export function findViewById(id) {
+    const view = new View(id);
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+			if (mutation.type == 'childList' && mutation.target && [...mutation.addedNodes].length) {
+            	if (typeof view.id == 'function') {
+            		const id = view.id();
+            		if (id) view.id = id;
+            	}
+            }
+		})
+    })
+    
+    observer.observe(document.body, {
+        attributes: true,
+        childList: true,
+        characterData: false,
+        subtree: true
+    })
+    
+    view.watch('id', (id, oldValue, nwValue) => {
+        setTimeout(()=>view.queue.exec(),0);
+        return nwValue
+    })
+    
+    return view;
+}
