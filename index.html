@@ -6,13 +6,24 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>find view</title>
 </head>
-<body>
+<body><div></div>
+	<script src="./object-watch.js">
     <script src="find-view.js" type="module"></script>
     <script type="module">
-    import {R} from './find-view.js';
+    import {R,findViewById} from './find-view.js';
 
-    R.id.data;
-    R.id.oi;
+    const data = findViewById(R.id.press);
+    
+    data.setViewOnListener({
+		click: e => { alert(e.target) }
+	});
+	
+    setTimeout(()=> {
+        let e = document.createElement('div')
+        e.innerText='click me'
+        e.id='press'
+		document.body.firstChild.appendChild(e)
+	}, 1000)
     </script>
 </body>
 </html>
